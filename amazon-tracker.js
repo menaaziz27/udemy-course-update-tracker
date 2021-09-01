@@ -1,5 +1,5 @@
 const cheerio = require('cheerio');
-const cron = require('cron');
+const CronJob = require('cron').CronJob;
 const puppeteer = require('puppeteer');
 const nodemailer = require('nodemailer');
 
@@ -17,17 +17,55 @@ const checkPrice = async page => {
 	const price = await page.evaluate(
 		() => document.querySelector('#priceblock_ourprice').textContent
 	);
-	console.log(price);
-	// const $ = cheerio.load(html);
-	// $('#priceblock_ourprice', html).each(node => {
-	// 	let price = $(this);
-	// 	console.log(node);
-	// });
+	const currentPrice = Number(price.replace(/[^0-9.-]+/g, ''));
+	console.log(currentPrice);
+
+	if (currentPrice < 400) {
+		console.log('send not');
+		sendNotification(price);
+		console.log('send not');
+	}
 };
 
-const monitor = async () => {
+const sendNotification = async price => {
+	let transporter = nodemailer.createTransport({
+		service: 'outlook',
+		secure: false,
+		auth: {
+			user: 'mayna.eaziz658@fci.s-mu.edu.eg',
+			pass: 'Iloveme22@@',
+		},
+	});
+
+	let textToSend = 'Price dropped to ' + price;
+	let htmlText = `<a href=\"${url}\">Link</a>`;
+
+	let info = await transporter.sendMail({
+		from: `"Price Tracker" <mayna.eaziz658@fci.s-mu.edu.eg>`,
+		to: 'menaaziz27@gmail.com',
+		subject: 'Price dropped to ' + price,
+		text: textToSend,
+		html: htmlText,
+	});
+
+	console.log('Message sent: %s', info.messageId);
+};
+
+const startTracking = async () => {
 	const page = await configBrowser();
-	await checkPrice(page);
+
+	const job = new CronJob(
+		'*/30 * * * * *',
+		() => {
+			checkPrice(page);
+		},
+		null,
+		true,
+		null,
+		null,
+		true
+	);
+	job.start();
 };
 
-monitor();
+startTracking();
