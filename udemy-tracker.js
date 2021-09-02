@@ -13,10 +13,10 @@ const configBrowser = async () => {
 };
 
 const checkUpdate = async page => {
-	// await page.goto(URL, {
-  //           timeout: 20000,
-  //           waitUntil: ['load', 'domcontentloaded', 'networkidle0', 'networkidle2']
-  //       });
+	await page.goto(URL, {
+            timeout: 20000,
+            waitUntil: ['load', 'domcontentloaded', 'networkidle0', 'networkidle2']
+        });
 	const spanText = await page.evaluate(
 		() => document.querySelector('.curriculum--content-length--1XzLS').textContent
 	);
