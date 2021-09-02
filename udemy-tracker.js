@@ -2,8 +2,8 @@ const CronJob = require('cron').CronJob;
 const puppeteer = require('puppeteer');
 const nodemailer = require('nodemailer');
 
-let URL = 'https://www.udemy.com/course/nodejs-the-complete-guide/';
-const TOTAL_NUM_OF_LECTURES = 36;
+const URL = 'https://www.udemy.com/course/nodejs-the-complete-guide/';
+const COURSE_PERIOD = "40h 31m";
 
 const configBrowser = async () => {
 	const browser = await puppeteer.launch({ headless: false });
@@ -13,16 +13,18 @@ const configBrowser = async () => {
 };
 
 const checkUpdate = async page => {
-	await page.goto(URL, {
-            timeout: 20000,
-            waitUntil: ['load', 'domcontentloaded', 'networkidle0', 'networkidle2']
-        });
+	// await page.goto(URL, {
+  //           timeout: 20000,
+  //           waitUntil: ['load', 'domcontentloaded', 'networkidle0', 'networkidle2']
+  //       });
 	const spanText = await page.evaluate(
 		() => document.querySelector('.curriculum--content-length--1XzLS').textContent
 	);
-	const lecturesNumber = Number(spanText.split(' ')[0]);
-	if (lecturesNumber !== TOTAL_NUM_OF_LECTURES) {
-		sendNotification(lecturesNumber);
+	const updatedCoursePeriod = spanText.split('•')[2].trim().substring(0,7);
+
+	// if both strings are not equal (course has been updated)
+	if (!updatedCoursePeriod.localeCompare(COURSE_PERIOD)) {
+		sendNotification(updatedCoursePeriod);
 	}
 };
 
@@ -35,7 +37,7 @@ const sendNotification = async lectures => {
 			pass: process.env.MY_PASSWORD,
 		},
 	});
-    let lecturesAdded = lectures - TOTAL_NUM_OF_LECTURES;
+    let lecturesAdded = lectures - COURSE_PERIOD;
 	let textToSend = `Course updated to ${lectures} lectures. (${lecturesAdded} added!)`;
 	let htmlText = `<a href=\"${URL}\">Link</a><br>`;
 
@@ -53,7 +55,7 @@ const sendNotification = async lectures => {
 const startTracking = async () => {
 	
 	const page = await configBrowser();
-	
+
 	// At 01:00 am everyday
 	const job = new CronJob(
 		'0 1 * * *', 
