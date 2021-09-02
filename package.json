@@ -2,18 +2,19 @@
 	"name": "web-scraper",
 	"version": "1.0.0",
 	"description": "",
-	"main": "index.js",
+	"main": "amazon-tracker.js",
 	"scripts": {
-		"start": "env-cmd -f ./config/dev.env node amazon-tracker.js",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"start": "env-cmd -f ./config/dev.env node udemy-tracker.js"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"cheerio": "^1.0.0-rc.10",
 		"cron": "^1.8.2",
 		"nodemailer": "^6.6.3",
 		"puppeteer": "^5.5.0"
+	},
+	"devDependencies": {
+		"env-cmd": "^10.1.0"
 	}
 }
